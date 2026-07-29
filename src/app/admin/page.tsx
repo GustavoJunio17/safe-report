@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCpf } from "@/lib/cpf";
+import { formatDateTime } from "@/lib/datetime";
 import {
   STATUS_LABEL,
   STATUS_ORDER,
@@ -14,11 +15,6 @@ import {
 import { AdminFilters } from "./filters";
 
 export const metadata: Metadata = { title: "Painel administrativo" };
-
-const dateTime = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "short",
-  timeStyle: "short",
-});
 
 function isStatus(value: string | undefined): value is ReportStatus {
   return !!value && (STATUS_ORDER as readonly string[]).includes(value);
@@ -138,7 +134,7 @@ export default async function AdminPage({
                       {report.accused_name}
                     </td>
                     <td className="px-5 py-4 text-muted tabular-nums">
-                      {dateTime.format(new Date(report.created_at))}
+                      {formatDateTime(report.created_at)}
                     </td>
                     <td className="px-5 py-4">
                       <StatusBadge status={report.status} />

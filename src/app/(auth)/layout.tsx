@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { currentYearInBrazil } from "@/lib/datetime";
 
 const HIGHLIGHTS = [
   {
@@ -33,7 +35,9 @@ export default function AuthLayout({
         />
 
         <div className="relative">
-          <Logo tone="dark" />
+          <Link href="/" aria-label="Ir para a página inicial">
+            <Logo tone="dark" />
+          </Link>
         </div>
 
         <div className="relative max-w-md">
@@ -71,14 +75,16 @@ export default function AuthLayout({
         </div>
 
         <p className="relative text-xs text-white/35">
-          © {new Date().getFullYear()} COAPI
+          © {currentYearInBrazil()} COAPI
         </p>
       </section>
 
       <section className="flex flex-1 items-center justify-center px-5 py-14">
         <div className="w-full max-w-sm">
           <div className="mb-10 lg:hidden">
-            <Logo />
+            <Link href="/" aria-label="Ir para a página inicial">
+              <Logo />
+            </Link>
           </div>
           {children}
         </div>

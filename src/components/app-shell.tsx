@@ -26,7 +26,11 @@ export function AppShell({
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-surface/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
-          <Link href="/admin" className="shrink-0">
+          <Link
+            href="/admin"
+            aria-label="Ir para a página inicial do painel"
+            className="shrink-0"
+          >
             <Logo />
           </Link>
 

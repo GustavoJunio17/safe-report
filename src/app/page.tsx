@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ReportForm } from "@/components/report-form";
 
@@ -21,7 +22,9 @@ export default function HomePage() {
     <>
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-5">
-          <Logo />
+          <Link href="/" aria-label="Ir para a página inicial">
+            <Logo />
+          </Link>
         </div>
       </header>
 

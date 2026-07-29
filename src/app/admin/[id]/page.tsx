@@ -6,20 +6,11 @@ import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCpf } from "@/lib/cpf";
+import { formatDateOnly, formatDateTimeLong } from "@/lib/datetime";
 import type { Report } from "@/lib/types";
 import { ReportReview } from "./review-form";
 
 export const metadata: Metadata = { title: "Detalhe da denúncia" };
-
-const dateTime = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "long",
-  timeStyle: "short",
-});
-
-const dateOnly = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "long",
-  timeZone: "UTC",
-});
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -82,7 +73,7 @@ export default async function ReportDetailPage({
           </h1>
           <p className="mt-1.5 text-sm text-muted">
             Protocolo {report.id.slice(0, 8).toUpperCase()} · recebida em{" "}
-            {dateTime.format(new Date(report.created_at))}
+            {formatDateTimeLong(report.created_at)}
           </p>
         </div>
         <StatusBadge status={report.status} />
@@ -106,9 +97,7 @@ export default async function ReportDetailPage({
               <Row label="CPF" value={formatCpf(report.cpf)} />
               <Row
                 label="Data de nascimento"
-                value={dateOnly.format(
-                  new Date(`${report.birth_date}T00:00:00Z`),
-                )}
+                value={formatDateOnly(report.birth_date)}
               />
             </dl>
             <p className="mt-4 text-xs text-muted">
@@ -125,7 +114,7 @@ export default async function ReportDetailPage({
             </p>
             <ReportReview report={report} />
             <p className="mt-4 text-xs text-muted">
-              Última atualização: {dateTime.format(new Date(report.updated_at))}
+              Última atualização: {formatDateTimeLong(report.updated_at)}
             </p>
           </div>
         </aside>
