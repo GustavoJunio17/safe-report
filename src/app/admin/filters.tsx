@@ -1,10 +1,12 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { STATUS_LABEL, STATUS_ORDER } from "@/lib/types";
 
 export function AdminFilters({ status, q }: { status: string; q: string }) {
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   function submit(formData: FormData) {
     const params = new URLSearchParams();
@@ -13,7 +15,11 @@ export function AdminFilters({ status, q }: { status: string; q: string }) {
     if (nextStatus) params.set("status", nextStatus);
     if (nextQuery) params.set("q", nextQuery);
     const search = params.toString();
-    router.push(search ? `/admin?${search}` : "/admin");
+    // A transição mantém o botão em estado de carregamento até a nova
+    // lista chegar do servidor.
+    startTransition(() => {
+      router.push(search ? `/admin?${search}` : "/admin");
+    });
   }
 
   return (
@@ -60,8 +66,36 @@ export function AdminFilters({ status, q }: { status: string; q: string }) {
         ))}
       </select>
 
-      <button type="submit" className="btn-secondary">
-        Filtrar
+      <button type="submit" disabled={pending} className="btn-secondary">
+        {pending ? (
+          <>
+            <svg
+              viewBox="0 0 24 24"
+              className="size-4 animate-spin"
+              aria-hidden="true"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="3"
+                fill="none"
+                opacity="0.25"
+              />
+              <path
+                d="M21 12a9 9 0 0 0-9-9"
+                stroke="currentColor"
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+              />
+            </svg>
+            Filtrando...
+          </>
+        ) : (
+          "Filtrar"
+        )}
       </button>
     </form>
   );
