@@ -14,19 +14,18 @@ export async function getProfile(): Promise<Profile | null> {
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   return (data as Profile) ?? null;
 }
 
-export async function requireProfile(): Promise<Profile> {
+/**
+ * Toda conta da plataforma é administrativa. Contas sem papel `admin`
+ * (criadas manualmente e ainda não promovidas) são tratadas como sem acesso.
+ */
+export async function requireAdmin(): Promise<Profile> {
   const profile = await getProfile();
   if (!profile) redirect("/login");
-  return profile;
-}
-
-export async function requireAdmin(): Promise<Profile> {
-  const profile = await requireProfile();
-  if (profile.role !== "admin") redirect("/relatar");
+  if (profile.role !== "admin") redirect("/login?erro=sem-permissao");
   return profile;
 }

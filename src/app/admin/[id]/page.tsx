@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatCpf } from "@/lib/cpf";
-import type { Profile, Report } from "@/lib/types";
+import type { Report } from "@/lib/types";
 import { ReportReview } from "./review-form";
 
 export const metadata: Metadata = { title: "Detalhe da denúncia" };
@@ -49,13 +49,6 @@ export default async function ReportDetailPage({
 
   if (!data) notFound();
   const report = data as Report;
-
-  const { data: authorData } = await supabase
-    .from("profiles")
-    .select("email, full_name")
-    .eq("id", report.user_id)
-    .maybeSingle();
-  const author = authorData as Pick<Profile, "email" | "full_name"> | null;
 
   return (
     <AppShell
@@ -113,13 +106,14 @@ export default async function ReportDetailPage({
               <Row label="CPF" value={formatCpf(report.cpf)} />
               <Row
                 label="Data de nascimento"
-                value={dateOnly.format(new Date(`${report.birth_date}T00:00:00Z`))}
-              />
-              <Row
-                label="Conta vinculada"
-                value={author?.email ?? "conta removida"}
+                value={dateOnly.format(
+                  new Date(`${report.birth_date}T00:00:00Z`),
+                )}
               />
             </dl>
+            <p className="mt-4 text-xs text-muted">
+              Enviado pelo formulário público, sem conta associada.
+            </p>
           </section>
         </div>
 

@@ -2,31 +2,36 @@
 
 Canal corporativo de denúncias. Next.js 16 (App Router) + Supabase (Auth + Postgres + RLS) + Tailwind CSS v4.
 
-## Perfis
+## Rotas
 
-| Perfil  | Acesso                                                                     |
-| ------- | -------------------------------------------------------------------------- |
-| `user`  | `/relatar` — formulário de denúncia + acompanhamento das próprias denúncias |
-| `admin` | `/admin` — painel com métricas, filtros, busca e tratativa de cada caso     |
+| Rota          | Acesso        | O que faz                                                     |
+| ------------- | ------------- | ------------------------------------------------------------- |
+| `/`           | público       | Formulário de denúncia. Sem conta, sem login. Devolve protocolo |
+| `/login`      | público       | Entrada da equipe interna                                     |
+| `/admin`      | só admin      | Painel: métricas, busca, filtro por status                    |
+| `/admin/[id]` | só admin      | Detalhe do caso, mudança de status e notas internas           |
 
-A rota `/` redireciona conforme o papel do usuário logado.
+Não existe cadastro na aplicação: contas administrativas são criadas manualmente no Supabase.
 
 ## Estrutura
 
 ```
 src/
-  proxy.ts                  # refresh de sessão + proteção de rotas (Next 16 "middleware")
+  proxy.ts                  # sessão + proteção de /admin (Next 16 "middleware")
   app/
-    (auth)/login|cadastro   # autenticação
-    relatar/                # área do usuário
-    admin/                  # painel do admin + detalhe /admin/[id]
-  components/               # UI compartilhada
+    page.tsx                # formulário público
+    (auth)/login/           # acesso restrito
+    admin/                  # painel + detalhe /admin/[id]
+  components/
+    report-form.tsx         # formulário público
   lib/
-    supabase/{server,client}.ts
+    supabase/{server,client,env}.ts
     actions/{auth,reports}.ts  # Server Actions com validação Zod
-    auth.ts                 # requireProfile / requireAdmin
+    auth.ts                 # requireAdmin
     cpf.ts                  # máscara + validação de dígitos
-supabase/schema.sql         # tabelas, trigger, RLS
+supabase/
+  schema.sql                # tabelas, trigger, RLS (banco novo)
+  migrations/               # ALTERs para banco já existente
 ```
 
 ## Rodar local
@@ -52,25 +57,23 @@ pnpm dev
 
    Cole em `.env.local`.
 
-4. **E-mail de confirmação** — Authentication → _Providers_ → _Email_:
-   - Para testar rápido, desligue **Confirm email** (o usuário entra direto após o cadastro).
-   - Em produção, mantenha ligado e configure SMTP próprio em Authentication → _Emails_ (o SMTP padrão do Supabase tem limite baixo).
-5. **URLs de redirecionamento** — Authentication → _URL Configuration_:
+4. **URLs de redirecionamento** — Authentication → _URL Configuration_:
    - `Site URL`: `https://seu-projeto.vercel.app`
    - `Redirect URLs`: `http://localhost:3000/**` e `https://seu-projeto.vercel.app/**`
-6. **Criar o admin** — cadastre-se em `/cadastro` e promova a conta no SQL Editor:
+5. **Criar o administrador** — Authentication → _Users_ → _Add user_ → _Create new user_. Marque **Auto Confirm User**. Depois, no SQL Editor:
 
    ```sql
-   update public.profiles set role = 'admin' where email = 'voce@empresa.com';
+   update public.profiles set role = 'admin' where email = 'voce@email.com';
    ```
 
-   Faça logout/login para o novo papel valer.
+   Repita para cada pessoa da equipe. Não há tela de cadastro na aplicação — é intencional: ninguém cria conta sozinho.
 
 ### Segurança do modelo de dados
 
-- RLS ativo nas duas tabelas: usuário lê/insere apenas as próprias denúncias; admin lê todas e é o único que altera status e notas.
+- `reports` aceita `INSERT` de qualquer visitante (o formulário é público), mas `SELECT`, `UPDATE` e `DELETE` exigem `is_admin()`. Uma pessoa que envie uma denúncia não consegue ler nenhuma — nem a própria.
 - O papel (`role`) nunca vem do cliente — é definido no banco e lido no servidor.
-- `admin_notes` só aparece na tela do admin.
+- `admin_notes` só existe na tela do admin.
+- Como o formulário é aberto, considere ativar proteção contra abuso na Vercel (BotID ou rate limit no WAF) antes de divulgar a URL.
 
 ---
 

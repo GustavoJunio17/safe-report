@@ -2,16 +2,16 @@ import { Logo } from "@/components/logo";
 
 const HIGHLIGHTS = [
   {
-    title: "Registro confidencial",
-    body: "Cada relato é vinculado apenas à sua conta e visível somente para a equipe responsável.",
+    title: "Visão consolidada",
+    body: "Todas as denúncias recebidas em um painel único, com métricas por status.",
   },
   {
-    title: "Acompanhamento em tempo real",
-    body: "Veja o status de cada denúncia enviada, do recebimento à conclusão.",
+    title: "Busca e filtros",
+    body: "Localize casos por denunciante, pessoa reclamada, CPF ou situação da apuração.",
   },
   {
-    title: "Gestão centralizada",
-    body: "O time administrativo trata todos os casos em um painel único e auditável.",
+    title: "Trilha de tratativa",
+    body: "Atualize o status e registre observações internas em cada caso.",
   },
 ];
 
@@ -59,11 +59,11 @@ export default function AuthLayout({
 
         <div className="relative max-w-md">
           <h1 className="text-3xl font-semibold tracking-tight text-white">
-            Canal de denúncias corporativas
+            Painel de apuração
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-white/60">
-            Um ambiente seguro para relatar condutas inadequadas e acompanhar a
-            apuração de cada caso.
+            Área interna da equipe responsável pelo tratamento das denúncias
+            recebidas pelo canal.
           </p>
 
           <ul className="mt-10 space-y-6">

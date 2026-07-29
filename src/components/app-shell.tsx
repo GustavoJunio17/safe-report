@@ -26,7 +26,7 @@ export function AppShell({
     <>
       <header className="sticky top-0 z-20 border-b border-line bg-surface/85 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5">
-          <Link href="/" className="shrink-0">
+          <Link href="/admin" className="shrink-0">
             <Logo />
           </Link>
 
@@ -37,9 +37,7 @@ export function AppShell({
               <p className="text-sm leading-tight font-medium text-ink">
                 {profile.full_name || profile.email}
               </p>
-              <p className="text-xs leading-tight text-muted">
-                {profile.role === "admin" ? "Administrador" : "Usuário"}
-              </p>
+              <p className="text-xs leading-tight text-muted">Administrador</p>
             </div>
             <span className="flex size-9 items-center justify-center rounded-full bg-brand-soft text-xs font-semibold text-brand-strong">
               {initials(profile)}

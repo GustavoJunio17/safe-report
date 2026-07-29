@@ -1,18 +1,15 @@
-export type Role = "admin" | "user";
-
 export type ReportStatus = "pendente" | "em_analise" | "resolvido" | "arquivado";
 
 export type Profile = {
   id: string;
   email: string;
   full_name: string | null;
-  role: Role;
+  role: "admin" | "user";
   created_at: string;
 };
 
 export type Report = {
   id: string;
-  user_id: string;
   full_name: string;
   cpf: string;
   birth_date: string;

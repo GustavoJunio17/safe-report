@@ -2,11 +2,24 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-const PUBLIC_ROUTES = ["/login", "/cadastro", "/auth"];
-
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const { url: supabaseUrl, anonKey } = supabaseEnv();
+
+  let supabaseUrl: string;
+  let anonKey: string;
+  try {
+    ({ url: supabaseUrl, anonKey } = supabaseEnv());
+  } catch (error) {
+    // Sem env válida o proxy roda em toda rota e derrubaria o site inteiro
+    // com um 500 vazio. Responde com a causa real para facilitar o diagnóstico.
+    const message =
+      error instanceof Error ? error.message : "Configuração inválida.";
+    console.error("[proxy] Supabase env inválida:", message);
+    return new NextResponse(`Erro de configuração: ${message}`, {
+      status: 500,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
 
   const supabase = createServerClient(supabaseUrl, anonKey, {
     cookies: {
@@ -32,18 +45,18 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
 
-  if (!user && !isPublic) {
+  // O formulário público é aberto; só a consulta administrativa exige sessão.
+  if (!user && pathname.startsWith("/admin")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublic) {
+  if (user && pathname.startsWith("/login")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/admin";
     url.search = "";
     return NextResponse.redirect(url);
   }
@@ -52,7 +65,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/admin/:path*", "/login"],
 };

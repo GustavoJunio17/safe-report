@@ -3,16 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { requireAdmin, requireProfile } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import { isValidCpf, onlyDigits } from "@/lib/cpf";
 import { STATUS_ORDER } from "@/lib/types";
 
 export type ReportFormState = {
   error?: string;
-  success?: string;
-  /** Muda a cada envio bem-sucedido para remontar (limpar) o formulário. */
-  token?: string;
+  /** Protocolo gerado quando o envio dá certo. */
+  protocol?: string;
   fieldErrors?: Record<string, string>;
+};
+
+export type ReviewFormState = {
+  error?: string;
+  success?: string;
 };
 
 const MIN_BIRTH_DATE = "1900-01-01";
@@ -23,20 +27,15 @@ const reportSchema = z.object({
     .string()
     .transform(onlyDigits)
     .refine((value) => isValidCpf(value), "CPF inválido."),
-  birthDate: z
-    .string()
-    .refine((value) => {
-      const date = new Date(value);
-      return (
-        !Number.isNaN(date.getTime()) &&
-        value >= MIN_BIRTH_DATE &&
-        date <= new Date()
-      );
-    }, "Data de nascimento inválida."),
-  accusedName: z
-    .string()
-    .trim()
-    .min(3, "Informe o nome da pessoa reclamada."),
+  birthDate: z.string().refine((value) => {
+    const date = new Date(value);
+    return (
+      !Number.isNaN(date.getTime()) &&
+      value >= MIN_BIRTH_DATE &&
+      date <= new Date()
+    );
+  }, "Data de nascimento inválida."),
+  accusedName: z.string().trim().min(3, "Informe o nome da pessoa reclamada."),
   reason: z
     .string()
     .trim()
@@ -44,12 +43,11 @@ const reportSchema = z.object({
     .max(5000, "O relato deve ter no máximo 5000 caracteres."),
 });
 
+/** Registro público: qualquer pessoa pode enviar, sem conta. */
 export async function createReport(
   _prev: ReportFormState,
   formData: FormData,
 ): Promise<ReportFormState> {
-  const profile = await requireProfile();
-
   const parsed = reportSchema.safeParse({
     fullName: formData.get("fullName"),
     cpf: formData.get("cpf"),
@@ -67,9 +65,13 @@ export async function createReport(
     return { error: "Revise os campos destacados.", fieldErrors };
   }
 
+  // O id é gerado aqui para devolver o protocolo sem precisar de SELECT —
+  // quem envia é anônimo e não tem permissão de leitura na tabela.
+  const id = crypto.randomUUID();
+
   const supabase = await createClient();
   const { error } = await supabase.from("reports").insert({
-    user_id: profile.id,
+    id,
     full_name: parsed.data.fullName,
     cpf: parsed.data.cpf,
     birth_date: parsed.data.birthDate,
@@ -81,11 +83,8 @@ export async function createReport(
     return { error: "Não foi possível registrar a denúncia. Tente novamente." };
   }
 
-  revalidatePath("/relatar");
-  return {
-    success: "Denúncia registrada. Você pode acompanhar o status abaixo.",
-    token: crypto.randomUUID(),
-  };
+  revalidatePath("/admin");
+  return { protocol: id.slice(0, 8).toUpperCase() };
 }
 
 const updateSchema = z.object({
@@ -95,9 +94,9 @@ const updateSchema = z.object({
 });
 
 export async function updateReport(
-  _prev: ReportFormState,
+  _prev: ReviewFormState,
   formData: FormData,
-): Promise<ReportFormState> {
+): Promise<ReviewFormState> {
   await requireAdmin();
 
   const parsed = updateSchema.safeParse({

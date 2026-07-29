@@ -7,18 +7,16 @@ import { Alert } from "@/components/alert";
 
 const initialState: AuthState = {};
 
-export function LoginForm({ redirectTo }: { redirectTo?: string }) {
+export function LoginForm() {
   const [state, formAction] = useActionState(signIn, initialState);
 
   return (
     <form action={formAction} className="mt-8 space-y-5">
-      <input type="hidden" name="redirect" value={redirectTo ?? "/"} />
-
       {state.error && <Alert tone="error">{state.error}</Alert>}
 
       <div>
         <label htmlFor="email" className="field-label">
-          E-mail corporativo
+          E-mail
         </label>
         <input
           id="email"
@@ -26,7 +24,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           type="email"
           autoComplete="email"
           required
-          placeholder="voce@empresa.com"
+          placeholder="voce@email.com"
           className="field-input"
         />
       </div>

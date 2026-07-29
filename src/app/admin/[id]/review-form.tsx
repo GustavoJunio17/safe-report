@@ -1,12 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateReport, type ReportFormState } from "@/lib/actions/reports";
+import { updateReport, type ReviewFormState } from "@/lib/actions/reports";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert } from "@/components/alert";
 import { STATUS_LABEL, STATUS_ORDER, type Report } from "@/lib/types";
 
-const initialState: ReportFormState = {};
+const initialState: ReviewFormState = {};
 
 export function ReportReview({ report }: { report: Report }) {
   const [state, formAction] = useActionState(updateReport, initialState);

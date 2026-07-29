@@ -1,6 +1,9 @@
 -- ============================================================
 -- Safe Report — schema completo
 -- Rode este arquivo inteiro no SQL Editor do Supabase.
+--
+-- Modelo: o formulário é PÚBLICO (sem conta). Apenas contas
+-- administrativas leem e tratam as denúncias.
 -- ============================================================
 
 -- ---------- Tipos ----------
@@ -14,7 +17,7 @@ begin
   end if;
 end $$;
 
--- ---------- Tabela: profiles ----------
+-- ---------- Tabela: profiles (só administradores têm conta) ----------
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   email text not null,
@@ -26,7 +29,6 @@ create table if not exists public.profiles (
 -- ---------- Tabela: reports ----------
 create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles (id) on delete cascade,
   full_name text not null,
   cpf text not null check (cpf ~ '^[0-9]{11}$'),
   birth_date date not null,
@@ -38,7 +40,6 @@ create table if not exists public.reports (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists reports_user_id_idx on public.reports (user_id);
 create index if not exists reports_status_idx on public.reports (status);
 create index if not exists reports_created_at_idx on public.reports (created_at desc);
 
@@ -56,7 +57,7 @@ as $$
   );
 $$;
 
--- ---------- Trigger: cria profile no signup ----------
+-- ---------- Trigger: cria profile ao criar usuário ----------
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -84,23 +85,20 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.reports  enable row level security;
 
--- profiles
+-- profiles: cada conta lê a si mesma; admin lê todas.
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select using (id = auth.uid() or public.is_admin());
 
-drop policy if exists "profiles_update_own" on public.profiles;
-create policy "profiles_update_own" on public.profiles
-  for update using (id = auth.uid()) with check (id = auth.uid() and role = (select role from public.profiles where id = auth.uid()));
+-- reports: qualquer visitante insere; ninguém anônimo lê.
+drop policy if exists "reports_insert_public" on public.reports;
+create policy "reports_insert_public" on public.reports
+  for insert to anon, authenticated
+  with check (true);
 
--- reports
-drop policy if exists "reports_select" on public.reports;
-create policy "reports_select" on public.reports
-  for select using (user_id = auth.uid() or public.is_admin());
-
-drop policy if exists "reports_insert_own" on public.reports;
-create policy "reports_insert_own" on public.reports
-  for insert with check (user_id = auth.uid());
+drop policy if exists "reports_select_admin" on public.reports;
+create policy "reports_select_admin" on public.reports
+  for select using (public.is_admin());
 
 drop policy if exists "reports_update_admin" on public.reports;
 create policy "reports_update_admin" on public.reports
@@ -110,7 +108,13 @@ drop policy if exists "reports_delete_admin" on public.reports;
 create policy "reports_delete_admin" on public.reports
   for delete using (public.is_admin());
 
+-- Políticas antigas do modelo com conta de usuário, se existirem.
+drop policy if exists "reports_select" on public.reports;
+drop policy if exists "reports_insert_own" on public.reports;
+drop policy if exists "profiles_update_own" on public.profiles;
+
 -- ============================================================
--- Promover uma conta a admin (rode depois de criar o usuário):
---   update public.profiles set role = 'admin' where email = 'voce@empresa.com';
+-- Criar um administrador:
+--   1. Authentication > Users > Add user (com senha, "Auto Confirm User")
+--   2. update public.profiles set role = 'admin' where email = 'voce@email.com';
 -- ============================================================
