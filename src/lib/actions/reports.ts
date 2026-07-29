@@ -35,7 +35,7 @@ const reportSchema = z.object({
   reason: z
     .string()
     .trim()
-    .min(20, "Descreva o ocorrido com ao menos 20 caracteres.")
+    .min(1, "Descreva o ocorrido.")
     .max(5000, "O relato deve ter no máximo 5000 caracteres."),
 });
 
