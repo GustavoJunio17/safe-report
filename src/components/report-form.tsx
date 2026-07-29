@@ -4,7 +4,8 @@ import { useActionState, useState } from "react";
 import { createReport, type ReportFormState } from "@/lib/actions/reports";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert } from "@/components/alert";
-import { formatCpf } from "@/lib/cpf";
+import { formatCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
+import { formatBirthDate, isValidBirthDate } from "@/lib/date";
 
 const initialState: ReportFormState = {};
 const MAX_REASON = 5000;
@@ -69,9 +70,41 @@ function FieldError({ message }: { message?: string }) {
   return <p className="mt-1.5 text-xs font-medium text-red-600">{message}</p>;
 }
 
+function FieldOk({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <p className="mt-1.5 flex items-center gap-1 text-xs font-medium text-emerald-600">
+      <svg viewBox="0 0 24 24" fill="none" className="size-3.5">
+        <path
+          d="m5 12.5 4.5 4.5L19 7"
+          stroke="currentColor"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      Confere
+    </p>
+  );
+}
+
 function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
   const [cpf, setCpf] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [reasonLength, setReasonLength] = useState(0);
+
+  // Só cobra o campo depois de completo — nada de erro enquanto ainda digita.
+  const cpfDigits = onlyDigits(cpf);
+  const cpfComplete = cpfDigits.length === 11;
+  const cpfOk = cpfComplete && isValidCpf(cpf);
+  const cpfError = cpfComplete && !cpfOk ? "CPF inválido." : fieldErrors?.cpf;
+
+  const birthComplete = birthDate.length === 10;
+  const birthOk = birthComplete && isValidBirthDate(birthDate);
+  const birthError =
+    birthComplete && !birthOk
+      ? "Data de nascimento inválida."
+      : fieldErrors?.birthDate;
 
   return (
     <>
@@ -108,9 +141,11 @@ function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
               value={cpf}
               onChange={(event) => setCpf(formatCpf(event.target.value))}
               placeholder="000.000.000-00"
+              aria-invalid={Boolean(cpfError)}
               className="field-input"
             />
-            <FieldError message={fieldErrors?.cpf} />
+            <FieldError message={cpfError} />
+            <FieldOk show={cpfOk} />
           </div>
 
           <div>
@@ -120,12 +155,18 @@ function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
             <input
               id="birthDate"
               name="birthDate"
-              type="date"
+              inputMode="numeric"
               required
-              max={new Date().toISOString().slice(0, 10)}
+              value={birthDate}
+              onChange={(event) =>
+                setBirthDate(formatBirthDate(event.target.value))
+              }
+              placeholder="dd/mm/aaaa"
+              aria-invalid={Boolean(birthError)}
               className="field-input"
             />
-            <FieldError message={fieldErrors?.birthDate} />
+            <FieldError message={birthError} />
+            <FieldOk show={birthOk} />
           </div>
         </div>
       </fieldset>
