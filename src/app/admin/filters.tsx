@@ -1,0 +1,68 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { STATUS_LABEL, STATUS_ORDER } from "@/lib/types";
+
+export function AdminFilters({ status, q }: { status: string; q: string }) {
+  const router = useRouter();
+
+  function submit(formData: FormData) {
+    const params = new URLSearchParams();
+    const nextStatus = String(formData.get("status") || "");
+    const nextQuery = String(formData.get("q") || "").trim();
+    if (nextStatus) params.set("status", nextStatus);
+    if (nextQuery) params.set("q", nextQuery);
+    const search = params.toString();
+    router.push(search ? `/admin?${search}` : "/admin");
+  }
+
+  return (
+    <form action={submit} className="flex flex-col gap-3 sm:flex-row">
+      <div className="relative flex-1">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted"
+        >
+          <circle
+            cx="11"
+            cy="11"
+            r="6.5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          />
+          <path
+            d="m16 16 4 4"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Buscar por denunciante, reclamado ou CPF"
+          className="field-input pl-9"
+        />
+      </div>
+
+      <select
+        name="status"
+        defaultValue={status}
+        className="field-input sm:w-52"
+      >
+        <option value="">Todos os status</option>
+        {STATUS_ORDER.map((item) => (
+          <option key={item} value={item}>
+            {STATUS_LABEL[item]}
+          </option>
+        ))}
+      </select>
+
+      <button type="submit" className="btn-secondary">
+        Filtrar
+      </button>
+    </form>
+  );
+}
