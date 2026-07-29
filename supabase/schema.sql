@@ -33,7 +33,7 @@ create table if not exists public.reports (
   cpf text not null check (cpf ~ '^[0-9]{11}$'),
   birth_date date not null,
   accused_name text not null,
-  reason text not null check (char_length(reason) between 20 and 5000),
+  reason text not null check (char_length(reason) between 1 and 5000),
   status public.report_status not null default 'pendente',
   admin_notes text,
   created_at timestamptz not null default now(),
