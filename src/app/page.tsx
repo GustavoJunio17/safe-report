@@ -25,24 +25,28 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="border-b border-line bg-ink">
-        <div className="mx-auto max-w-6xl px-5 py-16">
-          <p className="text-xs font-semibold tracking-widest text-white/40 uppercase">
-            Canal de denúncias
+      <section className="relative overflow-hidden bg-brand-strong">
+        <div
+          aria-hidden="true"
+          className="absolute -top-32 -right-24 size-96 rounded-full bg-accent/10 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-6xl px-5 py-16">
+          <p className="text-xs font-semibold tracking-widest text-accent uppercase">
+            COAPI · Canal de denúncias
           </p>
           <h1 className="mt-3 max-w-2xl text-4xl font-semibold tracking-tight text-white">
             Registre uma denúncia de forma segura
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60">
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/70">
             Preencha o formulário abaixo com o máximo de detalhes possível. Seu
             relato é encaminhado diretamente à equipe responsável pela apuração.
           </p>
 
           <ul className="mt-10 grid gap-6 sm:grid-cols-3">
             {HIGHLIGHTS.map((item) => (
-              <li key={item.title}>
+              <li key={item.title} className="border-t border-accent/30 pt-4">
                 <p className="text-sm font-medium text-white">{item.title}</p>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/50">
+                <p className="mt-1.5 text-sm leading-relaxed text-white/60">
                   {item.body}
                 </p>
               </li>
@@ -67,7 +71,7 @@ export default function HomePage() {
 
       <footer className="border-t border-line py-6">
         <p className="mx-auto max-w-6xl px-5 text-xs text-muted">
-          Safe Report · Canal confidencial de denúncias. Os dados informados são
+          COAPI · Canal confidencial de denúncias. Os dados informados são
           usados exclusivamente na apuração do caso.
         </p>
       </footer>

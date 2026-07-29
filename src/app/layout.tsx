@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Safe Report",
-    template: "%s · Safe Report",
+    default: "Canal de Denúncias · COAPI",
+    template: "%s · COAPI",
   },
   description:
-    "Canal seguro para registro e acompanhamento de denúncias corporativas.",
+    "Canal seguro e confidencial para registro de denúncias na COAPI.",
 };
 
 export default function RootLayout({

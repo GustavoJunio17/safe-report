@@ -22,39 +22,18 @@ export default function AuthLayout({
 }) {
   return (
     <div className="grid min-h-full flex-1 lg:grid-cols-2">
-      <section className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 lg:flex">
+      <section className="relative hidden flex-col justify-between overflow-hidden bg-brand-strong p-12 lg:flex">
         <div
           aria-hidden="true"
-          className="absolute -top-40 -right-32 size-[26rem] rounded-full bg-brand/35 blur-3xl"
+          className="absolute -top-40 -right-32 size-[26rem] rounded-full bg-accent/10 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-48 -left-24 size-[24rem] rounded-full bg-brand/20 blur-3xl"
+          className="absolute -bottom-48 -left-24 size-[24rem] rounded-full bg-black/20 blur-3xl"
         />
 
         <div className="relative">
-          <span className="inline-flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-white/10 text-white ring-1 ring-white/20">
-              <svg viewBox="0 0 24 24" fill="none" className="size-4.5">
-                <path
-                  d="M12 3 5 6v5.5c0 4.3 2.9 8.3 7 9.5 4.1-1.2 7-5.2 7-9.5V6l-7-3Z"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="m9.2 12.2 2 2 3.6-3.9"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight text-white">
-              SafeReport
-            </span>
-          </span>
+          <Logo tone="dark" />
         </div>
 
         <div className="relative max-w-md">
@@ -69,11 +48,11 @@ export default function AuthLayout({
           <ul className="mt-10 space-y-6">
             {HIGHLIGHTS.map((item) => (
               <li key={item.title} className="flex gap-3.5">
-                <span className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                <span className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-accent/15 ring-1 ring-accent/30">
                   <svg viewBox="0 0 24 24" fill="none" className="size-3">
                     <path
                       d="m5 12.5 4.5 4.5L19 7"
-                      stroke="white"
+                      stroke="#FEF200"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -82,7 +61,7 @@ export default function AuthLayout({
                 </span>
                 <div>
                   <p className="text-sm font-medium text-white">{item.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-white/50">
+                  <p className="mt-1 text-sm leading-relaxed text-white/60">
                     {item.body}
                   </p>
                 </div>
@@ -92,7 +71,7 @@ export default function AuthLayout({
         </div>
 
         <p className="relative text-xs text-white/35">
-          © {new Date().getFullYear()} Safe Report
+          © {new Date().getFullYear()} COAPI
         </p>
       </section>
 

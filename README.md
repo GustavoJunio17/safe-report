@@ -1,6 +1,6 @@
-# Safe Report
+# COAPI — Canal de Denúncias
 
-Canal corporativo de denúncias. Next.js 16 (App Router) + Supabase (Auth + Postgres + RLS) + Tailwind CSS v4.
+Canal de denúncias da COAPI. Next.js 16 (App Router) + Supabase (Auth + Postgres + RLS) + Tailwind CSS v4.
 
 ## Rotas
 

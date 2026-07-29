@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
+/* Paleta derivada da marca da COAPI: verde #056839 e amarelo #FEF200. */
 @theme {
-  --color-canvas: oklch(0.984 0.003 250);
+  --color-canvas: oklch(0.982 0.004 150);
   --color-surface: oklch(1 0 0);
-  --color-line: oklch(0.923 0.006 250);
-  --color-ink: oklch(0.24 0.02 262);
-  --color-muted: oklch(0.53 0.02 262);
-  --color-brand: oklch(0.52 0.16 264);
-  --color-brand-strong: oklch(0.44 0.17 264);
-  --color-brand-soft: oklch(0.965 0.02 264);
+  --color-line: oklch(0.918 0.008 155);
+  --color-ink: oklch(0.25 0.025 160);
+  --color-muted: oklch(0.53 0.02 160);
+  --color-brand: #056839;
+  --color-brand-strong: #044c2a;
+  --color-brand-soft: oklch(0.955 0.03 155);
+  --color-accent: #fef200;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;

@@ -60,7 +60,7 @@ export function AppShell({
 
       <footer className="border-t border-line py-6">
         <p className="mx-auto max-w-6xl px-5 text-xs text-muted">
-          Safe Report · Canal confidencial de denúncias. Todos os registros são
+          COAPI · Canal confidencial de denúncias. Todos os registros são
           tratados de forma sigilosa.
         </p>
       </footer>
