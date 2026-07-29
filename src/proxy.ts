@@ -54,7 +54,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname.startsWith("/login")) {
+  // `?erro=` sinaliza que /admin recusou esta sessão. Redirecionar de volta
+  // criaria um loop: a página de login precisa poder exibir o motivo.
+  const hasError = request.nextUrl.searchParams.has("erro");
+
+  if (user && pathname.startsWith("/login") && !hasError) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     url.search = "";

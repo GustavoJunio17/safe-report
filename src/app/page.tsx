@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ReportForm } from "@/components/report-form";
 
@@ -21,14 +20,8 @@ export default function HomePage() {
   return (
     <>
       <header className="border-b border-line bg-surface">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+        <div className="mx-auto flex h-16 max-w-6xl items-center px-5">
           <Logo />
-          <Link
-            href="/login"
-            className="text-sm font-medium text-muted transition hover:text-ink"
-          >
-            Acesso restrito
-          </Link>
         </div>
       </header>
 

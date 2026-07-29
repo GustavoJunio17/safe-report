@@ -4,14 +4,14 @@
 -- (Em banco novo, use apenas supabase/schema.sql.)
 -- ============================================================
 
--- 1. Denúncias não pertencem mais a uma conta.
-alter table public.reports drop column if exists user_id;
-drop index if exists public.reports_user_id_idx;
-
--- 2. Políticas do modelo antigo.
+-- 1. Políticas do modelo antigo (dependem de user_id, então caem primeiro).
 drop policy if exists "reports_select" on public.reports;
 drop policy if exists "reports_insert_own" on public.reports;
 drop policy if exists "profiles_update_own" on public.profiles;
+
+-- 2. Denúncias não pertencem mais a uma conta.
+alter table public.reports drop column if exists user_id;
+drop index if exists public.reports_user_id_idx;
 
 -- 3. Envio público, leitura restrita a administradores.
 drop policy if exists "reports_insert_public" on public.reports;
