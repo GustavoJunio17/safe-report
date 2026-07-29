@@ -1,4 +1,5 @@
 import { onlyDigits } from "@/lib/cpf";
+import { todayInBrazil } from "@/lib/datetime";
 
 const MIN_BIRTH_DATE = "1900-01-01";
 
@@ -34,5 +35,7 @@ export function parseBirthDate(value: string): string | null {
 export function isValidBirthDate(value: string) {
   const iso = parseBirthDate(value);
   if (!iso) return false;
-  return iso >= MIN_BIRTH_DATE && iso <= new Date().toISOString().slice(0, 10);
+  // "Hoje" pelo relógio de Brasília: em UTC, das 21h à meia-noite o dia já
+  // virou e uma data de amanhã passaria como válida.
+  return iso >= MIN_BIRTH_DATE && iso <= todayInBrazil();
 }
