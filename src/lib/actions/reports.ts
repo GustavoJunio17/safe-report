@@ -76,6 +76,9 @@ export async function createReport(
   });
 
   if (error) {
+    // A mensagem do Postgres não vai para a tela (pode vazar detalhe do
+    // schema), mas sem ela no log qualquer falha aqui vira adivinhação.
+    console.error("[createReport] insert falhou:", error);
     return { error: "Não foi possível registrar a denúncia. Tente novamente." };
   }
 
