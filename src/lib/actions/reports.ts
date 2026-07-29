@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { isValidCpf, onlyDigits } from "@/lib/cpf";
+import { isValidBirthDate, parseBirthDate } from "@/lib/date";
 import { STATUS_ORDER } from "@/lib/types";
 
 export type ReportFormState = {
@@ -19,22 +20,17 @@ export type ReviewFormState = {
   success?: string;
 };
 
-const MIN_BIRTH_DATE = "1900-01-01";
-
 const reportSchema = z.object({
   fullName: z.string().trim().min(3, "Informe o nome completo."),
   cpf: z
     .string()
     .transform(onlyDigits)
     .refine((value) => isValidCpf(value), "CPF inválido."),
-  birthDate: z.string().refine((value) => {
-    const date = new Date(value);
-    return (
-      !Number.isNaN(date.getTime()) &&
-      value >= MIN_BIRTH_DATE &&
-      date <= new Date()
-    );
-  }, "Data de nascimento inválida."),
+  // O formulário envia dd/mm/aaaa; o banco guarda aaaa-mm-dd.
+  birthDate: z
+    .string()
+    .refine(isValidBirthDate, "Data de nascimento inválida.")
+    .transform((value) => parseBirthDate(value) as string),
   accusedName: z.string().trim().min(3, "Informe o nome da pessoa reclamada."),
   reason: z
     .string()
