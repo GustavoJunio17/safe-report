@@ -4,7 +4,6 @@ import { AppShell, NavLink } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatCpf } from "@/lib/cpf";
 import { formatDateTime } from "@/lib/datetime";
 import {
   STATUS_LABEL,
@@ -42,7 +41,7 @@ export default async function AdminPage({
   const term = q?.trim();
   if (term) {
     query = query.or(
-      `full_name.ilike.%${term}%,accused_name.ilike.%${term}%,cpf.ilike.%${term}%`,
+      `full_name.ilike.%${term}%,accused_name.ilike.%${term}%`,
     );
   }
 
@@ -115,7 +114,7 @@ export default async function AdminPage({
               <thead className="bg-canvas text-xs tracking-wide text-muted uppercase">
                 <tr>
                   <th className="px-5 py-3 font-medium">Denunciante</th>
-                  <th className="px-5 py-3 font-medium">Reclamado</th>
+                  <th className="px-5 py-3 font-medium">Denunciado</th>
                   <th className="px-5 py-3 font-medium">Recebida em</th>
                   <th className="px-5 py-3 font-medium">Status</th>
                   <th className="px-5 py-3" />
@@ -126,9 +125,6 @@ export default async function AdminPage({
                   <tr key={report.id} className="transition hover:bg-canvas/70">
                     <td className="px-5 py-4">
                       <p className="font-medium text-ink">{report.full_name}</p>
-                      <p className="text-xs text-muted">
-                        CPF {formatCpf(report.cpf)}
-                      </p>
                     </td>
                     <td className="px-5 py-4 text-ink">
                       {report.accused_name}

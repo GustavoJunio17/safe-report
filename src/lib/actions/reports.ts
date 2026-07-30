@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
-import { isValidCpf, onlyDigits } from "@/lib/cpf";
 import { isValidBirthDate, parseBirthDate } from "@/lib/date";
 import { STATUS_ORDER } from "@/lib/types";
 
@@ -22,21 +21,20 @@ export type ReviewFormState = {
 
 const reportSchema = z.object({
   fullName: z.string().trim().min(3, "Informe o nome completo."),
-  cpf: z
-    .string()
-    .transform(onlyDigits)
-    .refine((value) => isValidCpf(value), "CPF inválido."),
   // O formulário envia dd/mm/aaaa; o banco guarda aaaa-mm-dd.
   birthDate: z
     .string()
     .refine(isValidBirthDate, "Data de nascimento inválida.")
     .transform((value) => parseBirthDate(value) as string),
-  accusedName: z.string().trim().min(3, "Informe o nome da pessoa reclamada."),
+  accusedName: z
+    .string()
+    .trim()
+    .min(3, "Informe o nome da pessoa a ser denunciada."),
   reason: z
     .string()
     .trim()
     .min(1, "Descreva o ocorrido.")
-    .max(5000, "O relato deve ter no máximo 5000 caracteres."),
+    .max(1000, "O relato deve ter no máximo 1000 caracteres."),
 });
 
 /** Registro público: qualquer pessoa pode enviar, sem conta. */
@@ -46,7 +44,6 @@ export async function createReport(
 ): Promise<ReportFormState> {
   const parsed = reportSchema.safeParse({
     fullName: formData.get("fullName"),
-    cpf: formData.get("cpf"),
     birthDate: formData.get("birthDate"),
     accusedName: formData.get("accusedName"),
     reason: formData.get("reason"),
@@ -69,7 +66,6 @@ export async function createReport(
   const { error } = await supabase.from("reports").insert({
     id,
     full_name: parsed.data.fullName,
-    cpf: parsed.data.cpf,
     birth_date: parsed.data.birthDate,
     accused_name: parsed.data.accusedName,
     reason: parsed.data.reason,

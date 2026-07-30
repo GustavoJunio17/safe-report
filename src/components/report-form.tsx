@@ -4,11 +4,10 @@ import { useActionState, useState } from "react";
 import { createReport, type ReportFormState } from "@/lib/actions/reports";
 import { SubmitButton } from "@/components/submit-button";
 import { Alert } from "@/components/alert";
-import { formatCpf, isValidCpf, onlyDigits } from "@/lib/cpf";
 import { formatBirthDate, isValidBirthDate } from "@/lib/date";
 
 const initialState: ReportFormState = {};
-const MAX_REASON = 5000;
+const MAX_REASON = 1000;
 
 export function ReportForm() {
   const [state, formAction] = useActionState(createReport, initialState);
@@ -89,16 +88,10 @@ function FieldOk({ show }: { show: boolean }) {
 }
 
 function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
-  const [cpf, setCpf] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [reasonLength, setReasonLength] = useState(0);
 
   // Só cobra o campo depois de completo — nada de erro enquanto ainda digita.
-  const cpfDigits = onlyDigits(cpf);
-  const cpfComplete = cpfDigits.length === 11;
-  const cpfOk = cpfComplete && isValidCpf(cpf);
-  const cpfError = cpfComplete && !cpfOk ? "CPF inválido." : fieldErrors?.cpf;
-
   const birthComplete = birthDate.length === 10;
   const birthOk = birthComplete && isValidBirthDate(birthDate);
   const birthError =
@@ -128,46 +121,25 @@ function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
           <FieldError message={fieldErrors?.fullName} />
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="cpf" className="field-label">
-              CPF
-            </label>
-            <input
-              id="cpf"
-              name="cpf"
-              inputMode="numeric"
-              required
-              value={cpf}
-              onChange={(event) => setCpf(formatCpf(event.target.value))}
-              placeholder="000.000.000-00"
-              aria-invalid={Boolean(cpfError)}
-              className="field-input"
-            />
-            <FieldError message={cpfError} />
-            <FieldOk show={cpfOk} />
-          </div>
-
-          <div>
-            <label htmlFor="birthDate" className="field-label">
-              Data de nascimento
-            </label>
-            <input
-              id="birthDate"
-              name="birthDate"
-              inputMode="numeric"
-              required
-              value={birthDate}
-              onChange={(event) =>
-                setBirthDate(formatBirthDate(event.target.value))
-              }
-              placeholder="dd/mm/aaaa"
-              aria-invalid={Boolean(birthError)}
-              className="field-input"
-            />
-            <FieldError message={birthError} />
-            <FieldOk show={birthOk} />
-          </div>
+        <div>
+          <label htmlFor="birthDate" className="field-label">
+            Data de nascimento
+          </label>
+          <input
+            id="birthDate"
+            name="birthDate"
+            inputMode="numeric"
+            required
+            value={birthDate}
+            onChange={(event) =>
+              setBirthDate(formatBirthDate(event.target.value))
+            }
+            placeholder="dd/mm/aaaa"
+            aria-invalid={Boolean(birthError)}
+            className="field-input"
+          />
+          <FieldError message={birthError} />
+          <FieldOk show={birthOk} />
         </div>
       </fieldset>
 
@@ -180,14 +152,14 @@ function Fields({ fieldErrors }: { fieldErrors?: Record<string, string> }) {
 
         <div>
           <label htmlFor="accusedName" className="field-label">
-            Nome da pessoa reclamada
+            Nome da pessoa a ser denunciada
           </label>
           <input
             id="accusedName"
             name="accusedName"
             type="text"
             required
-            placeholder="Nome de quem você quer reclamar"
+            placeholder="Nome de quem você quer denunciar"
             className="field-input"
           />
           <FieldError message={fieldErrors?.accusedName} />

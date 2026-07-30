@@ -48,7 +48,7 @@ export function AdminFilters({ status, q }: { status: string; q: string }) {
         <input
           name="q"
           defaultValue={q}
-          placeholder="Buscar por denunciante, reclamado ou CPF"
+          placeholder="Buscar por denunciante ou denunciado"
           className="field-input pl-9"
         />
       </div>

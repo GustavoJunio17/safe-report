@@ -28,7 +28,7 @@ src/
     supabase/{server,client,env}.ts
     actions/{auth,reports}.ts  # Server Actions com validação Zod
     auth.ts                 # requireAdmin
-    cpf.ts                  # máscara + validação de dígitos
+    date.ts                 # máscara dd/mm/aaaa + validação de nascimento
 supabase/
   schema.sql                # tabelas, trigger, RLS (banco novo)
   migrations/               # ALTERs para banco já existente
