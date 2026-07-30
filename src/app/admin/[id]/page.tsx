@@ -5,7 +5,6 @@ import { AppShell, NavLink } from "@/components/app-shell";
 import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { formatCpf } from "@/lib/cpf";
 import { formatDateOnly, formatDateTimeLong } from "@/lib/datetime";
 import type { Report } from "@/lib/types";
 import { ReportReview } from "./review-form";
@@ -94,7 +93,6 @@ export default async function ReportDetailPage({
             </h2>
             <dl className="mt-2 divide-y divide-line">
               <Row label="Nome completo" value={report.full_name} />
-              <Row label="CPF" value={formatCpf(report.cpf)} />
               <Row
                 label="Data de nascimento"
                 value={formatDateOnly(report.birth_date)}

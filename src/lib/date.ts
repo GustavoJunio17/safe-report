@@ -1,7 +1,10 @@
-import { onlyDigits } from "@/lib/cpf";
 import { todayInBrazil } from "@/lib/datetime";
 
 const MIN_BIRTH_DATE = "1900-01-01";
+
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
 
 /** Máscara progressiva dd/mm/aaaa. */
 export function formatBirthDate(value: string) {

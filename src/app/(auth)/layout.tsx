@@ -9,7 +9,7 @@ const HIGHLIGHTS = [
   },
   {
     title: "Busca e filtros",
-    body: "Localize casos por denunciante, pessoa reclamada, CPF ou situação da apuração.",
+    body: "Localize casos por denunciante, pessoa denunciada ou situação da apuração.",
   },
   {
     title: "Trilha de tratativa",
