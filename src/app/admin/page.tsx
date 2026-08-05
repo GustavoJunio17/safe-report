@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime } from "@/lib/datetime";
+import { sanitizeSearchTerm } from "@/lib/search";
 import {
   STATUS_LABEL,
   STATUS_ORDER,
@@ -38,11 +39,9 @@ export default async function AdminPage({
     query = query.eq("status", status);
   }
 
-  const term = q?.trim();
+  const term = sanitizeSearchTerm(q);
   if (term) {
-    query = query.or(
-      `full_name.ilike.%${term}%,accused_name.ilike.%${term}%`,
-    );
+    query = query.or(`full_name.ilike.%${term}%,accused_name.ilike.%${term}%`);
   }
 
   const [{ data }, { data: allStatuses }] = await Promise.all([
@@ -101,7 +100,7 @@ export default async function AdminPage({
 
       <div className="card overflow-hidden">
         <div className="border-b border-line p-5">
-          <AdminFilters status={isStatus(status) ? status : ""} q={q ?? ""} />
+          <AdminFilters status={isStatus(status) ? status : ""} q={term} />
         </div>
 
         {reports.length === 0 ? (

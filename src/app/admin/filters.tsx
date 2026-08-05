@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { STATUS_LABEL, STATUS_ORDER } from "@/lib/types";
+import { MAX_SEARCH_LENGTH } from "@/lib/search";
 
 export function AdminFilters({ status, q }: { status: string; q: string }) {
   const router = useRouter();
@@ -48,6 +49,7 @@ export function AdminFilters({ status, q }: { status: string; q: string }) {
         <input
           name="q"
           defaultValue={q}
+          maxLength={MAX_SEARCH_LENGTH}
           placeholder="Buscar por denunciante ou denunciado"
           className="field-input pl-9"
         />

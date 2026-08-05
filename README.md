@@ -29,6 +29,8 @@ src/
     actions/{auth,reports}.ts  # Server Actions com validação Zod
     auth.ts                 # requireAdmin
     date.ts                 # máscara dd/mm/aaaa + validação de nascimento
+    search.ts               # sanitiza o termo antes do filtro do PostgREST
+    rate-limit.ts           # teto de envios por IP no formulário público
 supabase/
   schema.sql                # tabelas, trigger, RLS (banco novo)
   migrations/               # ALTERs para banco já existente
@@ -71,9 +73,22 @@ pnpm dev
 ### Segurança do modelo de dados
 
 - `reports` aceita `INSERT` de qualquer visitante (o formulário é público), mas `SELECT`, `UPDATE` e `DELETE` exigem `is_admin()`. Uma pessoa que envie uma denúncia não consegue ler nenhuma — nem a própria.
+- **O `INSERT` público é restrito por coluna.** A chave anon é pública (vai no bundle do navegador), então a API REST do Supabase é um endpoint de escrita aberto para qualquer pessoa. Quem envia só pode gravar `id`, `full_name`, `birth_date`, `accused_name` e `reason`; `status` e `admin_notes` são revogados no grant _e_ barrados pelo `with check` da política. Sem isso, dava para registrar uma denúncia já como `arquivado` (sumindo da fila de pendentes) ou plantar texto no campo que a equipe lê como nota interna.
 - O papel (`role`) nunca vem do cliente — é definido no banco e lido no servidor.
+- Tamanho é limitado no banco, não só no formulário: nomes de 3 a 150 caracteres, relato até 1000, notas internas até 5000. `birth_date` tem faixa de sanidade; "não pode ser no futuro" é validado na aplicação pelo relógio de Brasília.
+- O role `anon` não tem privilégio de `select`/`update`/`delete` em `reports` nem nenhum em `profiles` — a RLS já bloqueava, o grant fecha a mesma porta uma camada antes.
+- A busca do painel sanitiza o termo antes de montar o filtro `.or()` do PostgREST. Vírgula, ponto e parêntese são separadores desse filtro: um termo cru vindo de `/admin?q=...` conseguiria anexar condições próprias.
 - `admin_notes` só existe na tela do admin.
-- Como o formulário é aberto, considere ativar proteção contra abuso na Vercel (BotID ou rate limit no WAF) antes de divulgar a URL.
+
+### Proteção contra abuso
+
+O formulário aceita no máximo 5 envios por minuto por IP, mas o controle é **em memória e por instância** — o processo é reciclado e a Vercel pode manter várias instâncias. Além disso, ele não cobre quem chama a API do Supabase direto, já que a chave anon é pública.
+
+Antes de divulgar a URL, ative uma defesa de borda de verdade: **BotID** ou rate limit no **WAF da Vercel** apontando para `/`.
+
+### Cabeçalhos
+
+`next.config.ts` aplica CSP, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `nosniff`, `Permissions-Policy` e HSTS em todas as rotas. `/admin/*` recebe ainda `Cache-Control: no-store` e `X-Robots-Tag: noindex` — o painel exibe denúncias identificadas e não deve ficar em cache intermediário nem ser indexado.
 
 ---
 

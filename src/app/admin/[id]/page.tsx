@@ -11,6 +11,9 @@ import { ReportReview } from "./review-form";
 
 export const metadata: Metadata = { title: "Detalhe da denúncia" };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="py-3.5">
@@ -29,6 +32,10 @@ export default async function ReportDetailPage({
 }) {
   const profile = await requireAdmin();
   const { id } = await params;
+
+  // Sem isto um id fora do formato vira erro do Postgres em vez de 404.
+  if (!UUID_PATTERN.test(id)) notFound();
+
   const supabase = await createClient();
 
   const { data } = await supabase

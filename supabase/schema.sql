@@ -27,14 +27,19 @@ create table if not exists public.profiles (
 );
 
 -- ---------- Tabela: reports ----------
+-- O teto de birth_date é fixo de propósito: um CHECK com current_date não
+-- é imutável e quebra dump/restore. "Não pode ser no futuro" é validado na
+-- aplicação, pelo relógio de Brasília.
 create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
-  full_name text not null,
-  birth_date date not null,
-  accused_name text not null,
+  full_name text not null check (char_length(full_name) between 3 and 150),
+  birth_date date not null
+    check (birth_date between date '1900-01-01' and date '2200-01-01'),
+  accused_name text not null
+    check (char_length(accused_name) between 3 and 150),
   reason text not null check (char_length(reason) between 1 and 1000),
   status public.report_status not null default 'pendente',
-  admin_notes text,
+  admin_notes text check (admin_notes is null or char_length(admin_notes) <= 5000),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -90,10 +95,24 @@ create policy "profiles_select_own" on public.profiles
   for select using (id = auth.uid() or public.is_admin());
 
 -- reports: qualquer visitante insere; ninguém anônimo lê.
+--
+-- A chave anon é pública (vai no bundle do navegador), então a API REST do
+-- Supabase é um endpoint de escrita aberto. Sem restringir colunas, daria
+-- para gravar a denúncia já como 'arquivado' — some da fila de pendentes —
+-- ou com admin_notes preenchido, que a equipe lê como nota interna.
+revoke insert on public.reports from anon, authenticated;
+grant insert (id, full_name, birth_date, accused_name, reason)
+  on public.reports to anon, authenticated;
+
+-- Visitante anônimo não lê, não altera e não apaga. A RLS abaixo já
+-- bloqueia; retirar o privilégio fecha a mesma porta uma camada antes.
+revoke select, update, delete on public.reports from anon;
+revoke all on public.profiles from anon;
+
 drop policy if exists "reports_insert_public" on public.reports;
 create policy "reports_insert_public" on public.reports
   for insert to anon, authenticated
-  with check (true);
+  with check (status = 'pendente' and admin_notes is null);
 
 drop policy if exists "reports_select_admin" on public.reports;
 create policy "reports_select_admin" on public.reports

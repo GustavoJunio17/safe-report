@@ -11,11 +11,12 @@ export async function proxy(request: NextRequest) {
     ({ url: supabaseUrl, anonKey } = supabaseEnv());
   } catch (error) {
     // Sem env válida o proxy roda em toda rota e derrubaria o site inteiro
-    // com um 500 vazio. Responde com a causa real para facilitar o diagnóstico.
+    // com um 500 vazio. A causa real vai só para o log do servidor: a
+    // mensagem cita a URL configurada e não deve chegar ao visitante.
     const message =
       error instanceof Error ? error.message : "Configuração inválida.";
     console.error("[proxy] Supabase env inválida:", message);
-    return new NextResponse(`Erro de configuração: ${message}`, {
+    return new NextResponse("Erro de configuração do servidor.", {
       status: 500,
       headers: { "content-type": "text/plain; charset=utf-8" },
     });

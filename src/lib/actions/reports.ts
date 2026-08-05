@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth";
 import { isValidBirthDate, parseBirthDate } from "@/lib/date";
+import { clientIp, isRateLimited } from "@/lib/rate-limit";
 import { STATUS_ORDER } from "@/lib/types";
 
 export type ReportFormState = {
@@ -20,7 +21,11 @@ export type ReviewFormState = {
 };
 
 const reportSchema = z.object({
-  fullName: z.string().trim().min(3, "Informe o nome completo."),
+  fullName: z
+    .string()
+    .trim()
+    .min(3, "Informe o nome completo.")
+    .max(150, "O nome deve ter no máximo 150 caracteres."),
   // O formulário envia dd/mm/aaaa; o banco guarda aaaa-mm-dd.
   birthDate: z
     .string()
@@ -29,7 +34,8 @@ const reportSchema = z.object({
   accusedName: z
     .string()
     .trim()
-    .min(3, "Informe o nome da pessoa a ser denunciada."),
+    .min(3, "Informe o nome da pessoa a ser denunciada.")
+    .max(150, "O nome deve ter no máximo 150 caracteres."),
   reason: z
     .string()
     .trim()
@@ -42,6 +48,12 @@ export async function createReport(
   _prev: ReportFormState,
   formData: FormData,
 ): Promise<ReportFormState> {
+  if (isRateLimited(await clientIp())) {
+    return {
+      error: "Muitos envios seguidos. Aguarde um minuto e tente novamente.",
+    };
+  }
+
   const parsed = reportSchema.safeParse({
     fullName: formData.get("fullName"),
     birthDate: formData.get("birthDate"),
